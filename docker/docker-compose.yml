@@ -175,9 +175,9 @@ services:
     image: "dtagdevsec/logstash:2204"
 
 # Ewsposter service
-  ewsposter:
-    build: ewsposter/.
-    image: "dtagdevsec/ewsposter:2204"
+#  ewsposter:
+#    build: ewsposter/.
+#    image: "dtagdevsec/ewsposter:2204"
 
 # Nginx service
   nginx:

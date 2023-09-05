@@ -73,11 +73,12 @@ function valid_ip()
 }
 
 # Let's ask for the architecture and set VARs accordingly...
-myARCH=$(dialog --backtitle "$myBACKTITLE" --title "[ Architecture ]" --menu "Please choose." 9 60 2 "amd64" "For x64 AMD / Intel CPUs" "arm64" "For Apple Silicon, 64 Bit ARM based CPUs" 3>&1 1>&2 2>&3 3>&-)
-if [ "$myARCH" == "" ];
-  then
-    exit
-fi
+# myARCH=$(dialog --backtitle "$myBACKTITLE" --title "[ Architecture ]" --menu "Please choose." 9 60 2 "amd64" "For x64 AMD / Intel CPUs" "arm64" "For Apple Silicon, 64 Bit ARM based CPUs" 3>&1 1>&2 2>&3 3>&-)
+# if [ "$myARCH" == "" ];
+#  then
+#    exit
+# fi
+myARCH="amd64"
 myMINIISOLINK="http://ftp.debian.org/debian/dists/bullseye/main/installer-$myARCH/current/images/netboot/mini.iso"
 myMINIISO="mini_$myARCH.iso"
 myTPOTISO="tpot_$myARCH.iso"
@@ -91,8 +92,8 @@ fi
 # Let's ask the user for a proxy ...
 while true;
 do
-  dialog --backtitle "$myBACKTITLE" --title "[ Proxy Settings ]" --yesno "\nDo you want to configure a proxy?" 7 50
-  myCONF_PROXY_USE=$?
+  #dialog --backtitle "$myBACKTITLE" --title "[ Proxy Settings ]" --yesno "\nDo you want to configure a proxy?" 7 50
+  myCONF_PROXY_USE="1"
   if [ "$myCONF_PROXY_USE" = "0" ]
     then
       myIPRESULT="false"
@@ -119,8 +120,8 @@ done
 # Let's ask the user for 802.1x data ...
 while true;
 do
-  dialog --backtitle "$myBACKTITLE" --title "[ Need 802.1x auth? ]" --yesno "\nDo you want to add a 802.1x host certificate?" 7 50
-  myCONF_PFX_USE=$?
+  #dialog --backtitle "$myBACKTITLE" --title "[ Need 802.1x auth? ]" --yesno "\nDo you want to add a 802.1x host certificate?" 7 50
+  myCONF_PFX_USE="1"
   if [ "$myCONF_PFX_USE" = "0" ]
     then
       myCONF_PFX_FILE=$(dialog --backtitle "$myBACKTITLE" --fselect "$myCONF_PFX_FILE" 15 50 3>&1 1>&2 2>&3 3>&-)
@@ -151,8 +152,8 @@ done
 # Let's ask the user for a ntp server ...
 while true;
 do
-  dialog --backtitle "$myBACKTITLE" --title "[ NTP server? ]" --yesno "\nDo you want to configure a ntp server?" 7 50
-  myCONF_NTP_USE=$?
+  #dialog --backtitle "$myBACKTITLE" --title "[ NTP server? ]" --yesno "\nDo you want to configure a ntp server?" 7 50
+  myCONF_NTP_USE="1"
   if [ "$myCONF_NTP_USE" = "0" ]
     then
       myIPRESULT="false"
@@ -282,8 +283,8 @@ sha256sum $myTPOTISO > "tpot_$myARCH.sha256"
 # Let's write the image
 while true;
 do
-  dialog --backtitle "$myBACKTITLE" --yesno "\nWrite .iso to USB drive?" 7 50
-  myUSBCOPY=$?
+  #dialog --backtitle "$myBACKTITLE" --yesno "\nWrite .iso to USB drive?" 7 50
+  myUSBCOPY="1"
   if [ "$myUSBCOPY" = "0" ]
     then
       myTARGET=$(dialog --backtitle "$myBACKTITLE" --title "[ Select target device ... ]" --menu "" 16 40 10 $(lsblk -io NAME,SIZE -dnp) 3>&1 1>&2 2>&3 3>&-)

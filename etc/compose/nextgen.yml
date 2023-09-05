@@ -451,16 +451,16 @@ services:
      - /data:/data
 
 ## Kibana service
-  kibana:
-    container_name: kibana
-    restart: always
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-    mem_limit: 1g
-    ports:
-     - "127.0.0.1:64296:5601"
-    image: "dtagdevsec/kibana:2204"
+#  kibana:
+#    container_name: kibana
+#    restart: always
+#    depends_on:
+#      elasticsearch:
+#        condition: service_healthy
+#    mem_limit: 1g
+#    ports:
+#     - "127.0.0.1:64296:5601"
+#    image: "dtagdevsec/kibana:2204"
 
 ## Logstash service
   logstash:
@@ -518,26 +518,26 @@ services:
 #### /ELK
 
 # Ewsposter service
-  ewsposter:
-    container_name: ewsposter
-    restart: always
-    networks:
-     - ewsposter_local
-    environment:
-     - EWS_HPFEEDS_ENABLE=false
-     - EWS_HPFEEDS_HOST=host
-     - EWS_HPFEEDS_PORT=port
-     - EWS_HPFEEDS_CHANNELS=channels
-     - EWS_HPFEEDS_IDENT=user
-     - EWS_HPFEEDS_SECRET=secret
-     - EWS_HPFEEDS_TLSCERT=false
-     - EWS_HPFEEDS_FORMAT=json
-    env_file:
-     - /opt/tpot/etc/compose/elk_environment
-    image: "dtagdevsec/ewsposter:2204"
-    volumes:
-     - /data:/data
-     - /data/ews/conf/ews.ip:/opt/ewsposter/ews.ip
+#  ewsposter:
+#    container_name: ewsposter
+#    restart: always
+#    networks:
+#     - ewsposter_local
+#    environment:
+#     - EWS_HPFEEDS_ENABLE=false
+#     - EWS_HPFEEDS_HOST=host
+#     - EWS_HPFEEDS_PORT=port
+#     - EWS_HPFEEDS_CHANNELS=channels
+#     - EWS_HPFEEDS_IDENT=user
+#     - EWS_HPFEEDS_SECRET=secret
+#     - EWS_HPFEEDS_TLSCERT=false
+#     - EWS_HPFEEDS_FORMAT=json
+#    env_file:
+#     - /opt/tpot/etc/compose/elk_environment
+#    image: "dtagdevsec/ewsposter:2204"
+#    volumes:
+#     - /data:/data
+#     - /data/ews/conf/ews.ip:/opt/ewsposter/ews.ip
 
 # Nginx service
   nginx:
