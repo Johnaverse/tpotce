@@ -1,0 +1,31 @@
+name: build-on-ubuntu
+on:
+  merge_group:
+  pull_request:
+  push:
+    branches:
+      - main
+      - release/**
+
+permissions:
+  contents: 'write'
+
+jobs:
+  build-on-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+      - run: sudo ./makeiso.sh
+      - name: Upload release asset
+        uses: svenstaro/upload-release-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./tpot_amd64.iso
+          asset_name: tpot_amd64.iso
+          tag: ${{ github.ref }}
+          body: |
+            ${{ github.event.head_commit.message }}
