@@ -11,8 +11,7 @@ jobs:
     sync:
       name: "Sync"
       runs-on: "ubuntu-latest"
-      permissions:
-        issues: write
+      permissions: write-all
       env:
         DEFAULT_BRANCH: "master"
   
