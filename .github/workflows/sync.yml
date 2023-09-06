@@ -1,7 +1,8 @@
 name: "Sync with upstream"
 on:
   push:
-    branches: master
+    tag:
+      - '*'
   schedule:
     # 1:05 past midnight UTC
     - cron: "5 1 * * *"

@@ -3,7 +3,7 @@ on:
   merge_group:
   pull_request:
   push:
-    tags:
+    tag:
       - '*'
 
 permissions:
@@ -18,7 +18,7 @@ jobs:
           ref: ${{ github.ref }}
 
       - name: Build
-      - run: sudo ./makeiso.sh
+        run: sudo ./makeiso.sh
 
       - name: Upload release asset
         uses: svenstaro/upload-release-action@v2
