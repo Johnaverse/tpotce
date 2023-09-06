@@ -34,7 +34,7 @@ jobs:
         - name: "Config Git"
           run: |
             git config user.name "Johnaverse"
-            git config user.email "johnathan.leung@johnaverse.cloud	"
+            git config user.email "johnathan.leung@johnaverse.cloud"
   
         - name: repo-sync
           uses: repo-sync/github-sync@v2
