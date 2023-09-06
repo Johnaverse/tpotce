@@ -1,8 +1,10 @@
 name: "Sync with upstream"
 on:
-    schedule:
-      # 1:05 past midnight UTC
-      - cron: "5 1 * * *"
+  push:
+    branches: master
+  schedule:
+    # 1:05 past midnight UTC
+    - cron: "5 1 * * *"
 
 
 jobs:
@@ -39,6 +41,8 @@ jobs:
           uses: repo-sync/github-sync@v2
           with:
             source_repo: "https://github.com/telekom-security/tpotce.git"
-            source_branch: "master"
-            destination_branch: "master"
+            source_branch: "*"
+            destination_branch: "*"
             github_token: ${{ secrets.GITHUB_TOKEN }}
+            with:
+              sync_tags: "true"
