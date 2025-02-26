@@ -1,0 +1,46 @@
+name: build-on-ubuntu
+
+on:
+  merge_group:
+  pull_request:
+  push:
+    tag:
+      - '*'
+
+permissions:
+  contents: write
+  # Added releases permission for creating releases
+  releases: write
+
+jobs:
+  build-on-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Set Date Variable
+        id: date
+        run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
+
+      - name: Build
+        run: |
+          sudo ./makeiso.sh
+          # Rename the output file to include date
+          mv tpot_amd64.iso "tpot-${{ steps.date.outputs.DATE }}.iso"
+
+      - name: Create Release and Upload Asset
+        uses: svenstaro/upload-release-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: "tpot-${{ steps.date.outputs.DATE }}.iso"
+          asset_name: "tpot-${{ steps.date.outputs.DATE }}.iso"
+          # Use date as the tag/release name
+          tag: "${{ steps.date.outputs.DATE }}"
+          overwrite: true
+          body: |
+            Built on ${{ steps.date.outputs.DATE }}
+            Commit message: ${{ github.event.head_commit.message }}
