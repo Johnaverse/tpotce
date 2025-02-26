@@ -1,9 +1,7 @@
 name: Sync Upstream
 
 on:
-  # Trigger manually if needed
   workflow_dispatch:
-  # Run daily at 1:05 AM UTC
   schedule:
     - cron: "5 1 * * *"
 
@@ -16,62 +14,67 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # Checkout the fork with full history
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0  # Full history for all branches
-          ref: ${{ github.ref }}
+          fetch-depth: 0
 
-      # Configure git user
       - name: Configure Git
         run: |
           git config user.name "GitHub Action"
           git config user.email "github-action@users.noreply.github.com"
           git config --global pull.rebase true
 
-      # Add upstream remote and fetch all branches
       - name: Add Upstream and Fetch
         run: |
-          git remote add upstream https://github.com/telekom-security/tpotce.git
+          git remote add upstream https://github.com/telekom-security/tpotce.git || true
           git fetch upstream --tags
           git fetch upstream '+refs/heads/*:refs/remotes/upstream/*'
 
-      # Sync all branches
       - name: Sync Branches
         run: |
-          # Get all upstream branches
-          UPSTREAM_BRANCHES=$(git branch -r | grep upstream/ | sed 's/upstream\///g')
+          # Get all upstream branches, excluding HEAD
+          UPSTREAM_BRANCHES=$(git branch -r | grep 'upstream/' | grep -v 'HEAD' | sed 's/upstream\///g')
           
           for branch in $UPSTREAM_BRANCHES; do
+            echo "Syncing branch: $branch"
+            
             # Check if branch exists locally
             if git show-ref --verify --quiet "refs/heads/$branch"; then
-              # Branch exists, try to merge
               git checkout "$branch"
-              git merge "upstream/$branch" || {
+              # Try merge first
+              if git merge "upstream/$branch" --ff-only; then
+                echo "Fast-forward merge successful for $branch"
+              else
                 # If merge fails, try rebase
                 git checkout "$branch"
-                git rebase "upstream/$branch" || {
+                if git rebase "upstream/$branch"; then
+                  echo "Rebase successful for $branch"
+                else
                   # If rebase fails, reset and create PR
                   git rebase --abort 2>/dev/null || true
                   git checkout -B "sync-$branch" "upstream/$branch"
-                  git push origin "sync-$branch" --force
+                  git push origin "refs/heads/sync-$branch" --force
                   gh pr create --base "$branch" --head "sync-$branch" \
                     --title "Sync $branch with upstream" \
                     --body "Automated sync from upstream/$branch" || true
-                }
-              }
+                fi
+              fi
             else
               # New branch, create and track it
               git checkout -b "$branch" "upstream/$branch"
             fi
-            git push origin "$branch" --force
+            
+            # Push using explicit refspec to avoid ambiguity
+            git push origin "refs/heads/$branch:refs/heads/$branch" --force || {
+              echo "Failed to push $branch, skipping..."
+              continue
+            }
           done
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Sync tags
       - name: Sync Tags
         run: |
-          git push origin --tags --force
+          git push origin --tags --force || echo "Tag sync failed, continuing..."
