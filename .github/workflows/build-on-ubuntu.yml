@@ -5,7 +5,8 @@ on:
   pull_request:
   push:
     tag:
-      - '*'
+      - '18*'
+      - '19*'
 
 permissions:
   contents: write
@@ -26,7 +27,7 @@ jobs:
         run: |
           sudo ./makeiso.sh
           # Rename the output file to include date
-          mv tpot_amd64.iso "tpot-${{ steps.date.outputs.DATE }}.iso"
+          mv tpot_amd64.iso "tpot-${{ steps.vars.outputs.TAG }}-${{ steps.date.outputs.DATE }}.iso"
 
       - name: Create Release and Upload Asset
         uses: svenstaro/upload-release-action@v2
