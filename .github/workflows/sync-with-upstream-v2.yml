@@ -1,0 +1,77 @@
+name: Sync Upstream
+
+on:
+  # Trigger manually if needed
+  workflow_dispatch:
+  # Run daily at 1:05 AM UTC
+  schedule:
+    - cron: "5 1 * * *"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Checkout the fork with full history
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0  # Full history for all branches
+          ref: ${{ github.ref }}
+
+      # Configure git user
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Action"
+          git config user.email "github-action@users.noreply.github.com"
+          git config --global pull.rebase true
+
+      # Add upstream remote and fetch all branches
+      - name: Add Upstream and Fetch
+        run: |
+          git remote add upstream https://github.com/[UPSTREAM_OWNER]/[UPSTREAM_REPO].git
+          git fetch upstream --tags
+          git fetch upstream '+refs/heads/*:refs/remotes/upstream/*'
+
+      # Sync all branches
+      - name: Sync Branches
+        run: |
+          # Get all upstream branches
+          UPSTREAM_BRANCHES=$(git branch -r | grep upstream/ | sed 's/upstream\///g')
+          
+          for branch in $UPSTREAM_BRANCHES; do
+            # Check if branch exists locally
+            if git show-ref --verify --quiet "refs/heads/$branch"; then
+              # Branch exists, try to merge
+              git checkout "$branch"
+              git merge "upstream/$branch" || {
+                # If merge fails, try rebase
+                git checkout "$branch"
+                git rebase "upstream/$branch" || {
+                  # If rebase fails, reset and create PR
+                  git rebase --abort 2>/dev/null || true
+                  git checkout -B "sync-$branch" "upstream/$branch"
+                  git push origin "sync-$branch" --force
+                  gh pr create --base "$branch" --head "sync-$branch" \
+                    --title "Sync $branch with upstream" \
+                    --body "Automated sync from upstream/$branch" || true
+                }
+              }
+            else
+              # New branch, create and track it
+              git checkout -b "$branch" "upstream/$branch"
+            fi
+            git push origin "$branch" --force
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Sync tags
+      - name: Sync Tags
+        run: |
+          git push origin --tags --force
